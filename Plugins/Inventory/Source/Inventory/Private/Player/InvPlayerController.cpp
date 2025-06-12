@@ -5,6 +5,7 @@
 
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "Widgets/HUD/InvHUDWidget.h"
 
 void AInvPlayerController::BeginPlay()
 {
@@ -18,6 +19,8 @@ void AInvPlayerController::BeginPlay()
 			Subsystem->AddMappingContext(Context, 0);
 		}
 	}
+
+	ConstructHUD();
 }
 
 void AInvPlayerController::SetupInputComponent()
@@ -31,4 +34,11 @@ void AInvPlayerController::SetupInputComponent()
 void AInvPlayerController::PrimaryInteract()
 {
 	UE_LOG(LogTemp, Warning, TEXT("PrimaryInteract"));
+}
+
+void AInvPlayerController::ConstructHUD()
+{
+	if (!IsLocalController()) return;
+	HUDWidget = CreateWidget<UInvHUDWidget>(this, HUDWidgetClass);
+	if (IsValid(HUDWidget)) HUDWidget->AddToViewport();
 }
