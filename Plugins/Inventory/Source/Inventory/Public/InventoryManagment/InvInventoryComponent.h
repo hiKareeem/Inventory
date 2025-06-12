@@ -6,8 +6,10 @@
 #include "Components/ActorComponent.h"
 #include "InvInventoryComponent.generated.h"
 
-
+class UInvInventoryItem;
 class UInvInventoryWidgetBase;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryItemChanged, UInvInventoryItem*, Item);
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class INVENTORY_API UInvInventoryComponent : public UActorComponent
@@ -16,6 +18,9 @@ class INVENTORY_API UInvInventoryComponent : public UActorComponent
 
 public:
 	UInvInventoryComponent();
+
+	FInventoryItemChanged OnItemAdded;
+	FInventoryItemChanged OnItemRemoved;
 
 protected:
 	virtual void BeginPlay() override;
