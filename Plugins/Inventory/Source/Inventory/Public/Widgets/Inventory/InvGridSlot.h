@@ -44,10 +44,10 @@ public:
 	void SetInvalidTexture();
 	
 private:
-	int32 SlotIndex = -1;
+	int32 SlotIndex = INDEX_NONE;
 	int32 StackCount = 0;
 	int32 UpperLeftIndex = INDEX_NONE;
-	bool bAvailable = false;
+	bool bAvailable = true;
 	TWeakObjectPtr<UInvInventoryItem> Item;
 	EInvGridSlotState SlotState = EInvGridSlotState::Unoccupied;
 

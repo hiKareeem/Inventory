@@ -39,3 +39,45 @@ public:
 	bool bStackable = false;
 	TArray<FInvSlotAvailability> SlotAvailabilities;
 };
+
+UENUM()
+enum class EInvTileQuadrant : uint8
+{
+	TopLeft UMETA(DisplayName = "Top Left"),
+	TopRight UMETA(DisplayName = "Top Right"),
+	BottomLeft UMETA(DisplayName = "Bottom Left"),
+	BottomRight UMETA(DisplayName = "Bottom Right"),
+	Invalid UMETA(DisplayName = "Invalid")
+};
+
+USTRUCT(BlueprintType)
+struct FInvTileParameters
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory")
+	FIntPoint TileCoordinates;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory")
+	int32 TileIndex = INDEX_NONE;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory")
+	EInvTileQuadrant Quadrant = EInvTileQuadrant::Invalid;
+};
+
+inline bool operator==(const FInvTileParameters& A, const FInvTileParameters& B)
+{
+	return A.TileCoordinates == B.TileCoordinates && A.TileIndex == B.TileIndex && A.Quadrant == B.Quadrant;
+}
+
+USTRUCT()
+struct FInvSpaceQueryResult
+{
+	GENERATED_BODY()
+
+public:
+	bool bHasSpace = false;
+	TWeakObjectPtr<UInvInventoryItem> ValidItem = nullptr;
+	int32 UpperLeftIndex = INDEX_NONE;
+};

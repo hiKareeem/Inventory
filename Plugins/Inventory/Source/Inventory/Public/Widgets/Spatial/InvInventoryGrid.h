@@ -8,6 +8,7 @@
 #include "Items/Fragments/InvItemFragment.h"
 #include "InvInventoryGrid.generated.h"
 
+enum class EInvGridSlotState : uint8;
 class UInvHoverItem;
 class UInvSlottedItem;
 class UInvItemComponent;
@@ -26,6 +27,7 @@ class INVENTORY_API UInvInventoryGrid : public UUserWidget
 
 public:
 	virtual void NativeOnInitialized() override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	
 	EInvItemCategory GetItemCategory() const { return ItemCategory; }
 	FInvSlotAvailabilityResult HasRoomForItem(const UInvItemComponent* ItemComponent);
@@ -65,6 +67,7 @@ private:
 	bool IsInGridBounds(const int32 StartingIndex, const FIntPoint& Dimensions) const;
 	int32 DetermineFillAmountForSlot(const bool bStackable, const int32 MaxStackSize, const int32 AmountToFill, const UInvGridSlot* GridSlot) const;
 	int32 GetStackAmount(const UInvGridSlot* GridSlot) const;
+	bool MatchesCategory(const UInvInventoryItem* Item) const { return Item->GetItemManifest().GetCategory() == ItemCategory; }
 	
 	bool IsRightClick(const FPointerEvent& MouseEvent) const;
 	bool IsLeftClick(const FPointerEvent& MouseEvent) const;
@@ -72,6 +75,16 @@ private:
 	void AssignHoveredItem(UInvInventoryItem* ClickedItem);
 	void AssignHoveredItem(UInvInventoryItem* ClickedItem, const int32 GridIndex, const int32 PreviousGridIndex);
 	void RemoveItemFromGrid(UInvInventoryItem* ClickedItem, const int32 GridIndex);
+	void UpdateTileParameters(const FVector2D& CanvasPosition, const FVector2D& MousePosition);
+	FIntPoint CalculateHoveredCoordinates(const FVector2D& CanvasPosition, const FVector2D& MousePosition) const;
+	EInvTileQuadrant DetermineHoveredQuadrant(const FVector2D& CanvasPosition, const FVector2D& MousePosition) const;
+	void OnTileParametersChanged(const FInvTileParameters& InTileParameters);
+	FIntPoint CalculateStartingCoordinates(const FIntPoint& Coordinates, const FIntPoint& Dimensions, const EInvTileQuadrant Quadrant) const;
+	FInvSpaceQueryResult CheckHoverPosition(const FIntPoint& Position, const FIntPoint& Dimensions);
+	bool CursorExitedCanvas(const FVector2D& BoundaryPosition, const FVector2D& BoundarySize, const FVector2D& Location);
+	void HighlightSlots(const int32 Index, const FIntPoint& Dimensions);
+	void UnhighlightSlots(const int32 Index, const FIntPoint& Dimensions);
+	void ChangeHoverType(const int32 Index, const FIntPoint& Dimensions, EInvGridSlotState GridSlotState);
 
 	UFUNCTION()
 	void AddStacks(const FInvSlotAvailabilityResult& Result);
@@ -114,5 +127,12 @@ private:
 	UPROPERTY()
 	TArray<TObjectPtr<UInvGridSlot>> GridSlots;
 
-	bool MatchesCategory(const UInvInventoryItem* Item) const { return Item->GetItemManifest().GetCategory() == ItemCategory; }
+	FInvTileParameters TileParameters;
+	FInvTileParameters LastTileParameters;
+	int32 ItemDropIndex = INDEX_NONE;
+	FInvSpaceQueryResult CurrentSpaceQueryResult;
+	bool bMouseWithinCanvas = false;
+	bool bLastMouseWithinCanvas = false;
+	int32 LastHighlightedIndex = INDEX_NONE;
+	FIntPoint LastHighlightedDimensions;
 };
