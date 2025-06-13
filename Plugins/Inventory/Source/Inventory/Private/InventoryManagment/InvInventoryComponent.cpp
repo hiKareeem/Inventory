@@ -11,6 +11,11 @@ UInvInventoryComponent::UInvInventoryComponent()
 	PrimaryComponentTick.bCanEverTick = false;
 }
 
+void UInvInventoryComponent::TryAddItem(UInvItemComponent* ItemComponent)
+{
+	OnInventoryFull.Broadcast();
+}
+
 void UInvInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
