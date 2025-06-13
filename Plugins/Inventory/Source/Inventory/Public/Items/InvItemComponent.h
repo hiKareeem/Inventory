@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InvItemManifest.h"
 #include "Components/ActorComponent.h"
 #include "InvItemComponent.generated.h"
 
@@ -14,4 +15,12 @@ class INVENTORY_API UInvItemComponent : public UActorComponent
 
 public:
 	UInvItemComponent();
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	FInvItemManifest GetItemManifest() const { return ItemManifest; }
+
+private:
+	UPROPERTY(Replicated, EditAnywhere, Category = "Inventory")
+	FInvItemManifest ItemManifest;
+	
 };

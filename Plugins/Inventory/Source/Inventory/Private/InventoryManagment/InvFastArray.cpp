@@ -2,6 +2,7 @@
 
 #include "InventoryManagment/InvInventoryComponent.h"
 #include "Items/InvInventoryItem.h"
+#include "Items/InvItemComponent.h"
 
 TArray<TObjectPtr<UInvInventoryItem>> FInvInventoryFastArray::GetAllItems() const
 {
@@ -39,7 +40,19 @@ void FInvInventoryFastArray::PreReplicatedRemove(const TArrayView<int32> Removed
 
 UInvInventoryItem* FInvInventoryFastArray::AddEntry(UInvItemComponent* ItemComponent)
 {
-	return nullptr;
+	check(OwningComponent);
+	AActor* OwningActor = OwningComponent->GetOwner();
+	check(OwningActor->HasAuthority());
+	UInvInventoryComponent* InventoryComponent = Cast<UInvInventoryComponent>(OwningComponent);
+	if (!IsValid(InventoryComponent)) return nullptr;
+
+	FInvInventoryEntry& NewEntry = Entries.AddDefaulted_GetRef();
+	NewEntry.Item = ItemComponent->GetItemManifest().Manifest(OwningActor);
+	
+	InventoryComponent->AddRepSubobject(NewEntry.Item);
+	MarkItemDirty(NewEntry);
+	
+	return NewEntry.Item;
 }
 
 UInvInventoryItem* FInvInventoryFastArray::AddEntry(UInvInventoryItem* Item)

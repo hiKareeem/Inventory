@@ -3,8 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InvGridTypes.h"
 #include "Blueprint/UserWidget.h"
 #include "InvInventoryWidgetBase.generated.h"
+
+class UInvItemComponent;
 
 /**
  * 
@@ -13,4 +16,7 @@ UCLASS()
 class INVENTORY_API UInvInventoryWidgetBase : public UUserWidget
 {
 	GENERATED_BODY()
+
+public:
+	virtual FInvSlotAvailabilityResult HasRoomForItem(const UInvItemComponent* ItemComponent) const { return FInvSlotAvailabilityResult(); }
 };

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
+#include "Items/InvItemManifest.h"
 #include "InvInventoryItem.generated.h"
 
 /**
@@ -13,4 +14,15 @@ UCLASS()
 class INVENTORY_API UInvInventoryItem : public UObject
 {
 	GENERATED_BODY()
+	
+public:
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	//UInvItemManifest* GetItemManifest() const { return ItemManifest.Get(); }
+	void SetItemManifest(const FInvItemManifest& Manifest);
+	
+private:
+
+	UPROPERTY(VisibleAnywhere, Replicated, meta = (BaseStruct = "/Script/Inventory.InvItemManifest"), Category = "Inventory")
+	FInstancedStruct ItemManifest;
 };

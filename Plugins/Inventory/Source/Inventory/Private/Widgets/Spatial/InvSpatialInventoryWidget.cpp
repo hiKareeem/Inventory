@@ -2,3 +2,8 @@
 
 
 #include "Widgets/Spatial/InvSpatialInventoryWidget.h"
+
+FInvSlotAvailabilityResult UInvSpatialInventoryWidget::HasRoomForItem(const UInvItemComponent* ItemComponent) const
+{
+	return FInvSlotAvailabilityResult();
+}

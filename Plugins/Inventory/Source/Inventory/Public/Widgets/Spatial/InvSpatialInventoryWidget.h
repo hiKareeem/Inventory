@@ -15,6 +15,9 @@ class INVENTORY_API UInvSpatialInventoryWidget : public UInvInventoryWidgetBase
 {
 	GENERATED_BODY()
 
+public:
+	virtual FInvSlotAvailabilityResult HasRoomForItem(const UInvItemComponent* ItemComponent) const override;
+	
 private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UInvInventoryGrid> InventoryGrid;

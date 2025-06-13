@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "InvFastArray.h"
 #include "Components/ActorComponent.h"
 #include "InvInventoryComponent.generated.h"
 
@@ -20,9 +21,18 @@ class INVENTORY_API UInvInventoryComponent : public UActorComponent
 
 public:
 	UInvInventoryComponent();
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Inventory")
 	void TryAddItem(UInvItemComponent* ItemComponent);
+
+	UFUNCTION(Server, Reliable)
+	void Server_AddNewItem(UInvItemComponent* ItemComponent, int32 StackCount);
+	
+	UFUNCTION(Server, Reliable)
+	void Server_AddStackableItem(UInvItemComponent* ItemComponent, int32 StackCount, int32 Remainder);
+
+	void AddRepSubobject(UObject* Subobject);
 
 	FInventoryItemChanged OnItemAdded;
 	FInventoryItemChanged OnItemRemoved;
@@ -33,6 +43,9 @@ protected:
 
 private:
 	void ConstructInventory();
+
+	UPROPERTY(Replicated)
+	FInvInventoryFastArray InventoryList;
 	
 	TWeakObjectPtr<APlayerController> OwningPlayerController;
 
