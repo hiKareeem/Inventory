@@ -484,7 +484,68 @@ void UInvInventoryGrid::AddStacks(const FInvSlotAvailabilityResult& Result)
 	}
 }
 
-void UInvInventoryGrid::OnSlottedItemClicked(int32 GridIndex, const FPointerEvent& MouseEvent)
+void UInvInventoryGrid::OnGridSlotClicked(int32 GridIndex, const FPointerEvent& MouseEvent)
+{
+	if (!IsValid(HoveredItem)) return;
+	if (!GridSlots.IsValidIndex(ItemDropIndex)) return;
+
+	if (CurrentSpaceQueryResult.ValidItem.IsValid() && GridSlots.IsValidIndex(CurrentSpaceQueryResult.UpperLeftIndex))
+	{
+		OnSlottedItemClicked(CurrentSpaceQueryResult.UpperLeftIndex, MouseEvent);
+		return;
+	}
+
+	TObjectPtr<UInvGridSlot>& GridSlot = GridSlots[ItemDropIndex];
+	if (!GridSlot->GetItem().IsValid())
+	{
+		PlaceAtIndex(ItemDropIndex);
+	}
+}
+
+void UInvInventoryGrid::PlaceAtIndex(const int32 Index)
+{
+	AddItemAtIndex(HoveredItem->GetItem(), Index, HoveredItem->IsStackable(), HoveredItem->GetStackCount());
+	UpdateGridSlots(HoveredItem->GetItem(), Index, HoveredItem->IsStackable(), HoveredItem->GetStackCount());
+	ClearHoveredItem();
+}
+
+void UInvInventoryGrid::ClearHoveredItem()
+{
+	if (!IsValid(HoveredItem)) return;
+
+	HoveredItem->SetItem(nullptr);
+	HoveredItem->SetPreviousIndex(INDEX_NONE);
+	HoveredItem->SetStackable(false);
+	HoveredItem->UpdateStackCount(0);
+	HoveredItem->SetImageBrush(FSlateNoResource());
+
+	HoveredItem->RemoveFromParent();
+	HoveredItem = nullptr;
+}
+
+void UInvInventoryGrid::OnGridSlotHovered(const int32 GridIndex, const FPointerEvent& MouseEvent)
+{
+	if (IsValid(HoveredItem)) return;
+
+	UInvGridSlot* GridSlot = GridSlots[GridIndex];
+	if (GridSlot->IsAvailable())
+	{
+		GridSlot->SetOccupiedTexture();
+	}
+}
+
+void UInvInventoryGrid::OnGridSlotUnhovered(const int32 GridIndex, const FPointerEvent& MouseEvent)
+{
+	if (IsValid(HoveredItem)) return;
+
+	UInvGridSlot* GridSlot = GridSlots[GridIndex];
+	if (GridSlot->IsAvailable())
+	{
+		GridSlot->SetUnoccupiedTexture();
+	}
+}
+
+void UInvInventoryGrid::OnSlottedItemClicked(const int32 GridIndex, const FPointerEvent& MouseEvent)
 {
 	check(GridSlots.IsValidIndex(GridIndex));
 	UInvInventoryItem* ClickedItem = GridSlots[GridIndex]->GetItem().Get();
@@ -604,6 +665,9 @@ void UInvInventoryGrid::ConstructGrid()
 			CanvasSlot->SetPosition(SlotPosition * SlotSize);
 			
 			GridSlots.Add(GridSlot);
+			GridSlot->OnSlotClicked.AddDynamic(this, &UInvInventoryGrid::OnGridSlotClicked);
+			GridSlot->OnSlotHovered.AddDynamic(this, &UInvInventoryGrid::OnGridSlotHovered);
+			GridSlot->OnSlotUnhovered.AddDynamic(this, &UInvInventoryGrid::OnGridSlotUnhovered);
 		}
 	}
 }

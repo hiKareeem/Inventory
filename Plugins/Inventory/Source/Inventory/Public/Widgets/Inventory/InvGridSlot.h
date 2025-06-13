@@ -8,6 +8,8 @@
 #include "Items/InvInventoryItem.h"
 #include "InvGridSlot.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FGridSlotEvent, int32, GridIndex, const FPointerEvent&, MouseEvent);
+
 UENUM(BlueprintType)
 enum class EInvGridSlotState : uint8
 {
@@ -26,6 +28,10 @@ class INVENTORY_API UInvGridSlot : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
+	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	
 	int32 GetIndex() const { return SlotIndex; }
 	void SetIndex(int32 Index) { SlotIndex = Index; }
 	EInvGridSlotState GetState() const { return SlotState; }
@@ -42,6 +48,10 @@ public:
 	void SetOccupiedTexture();
 	void SetSelectedTexture();
 	void SetInvalidTexture();
+
+	FGridSlotEvent OnSlotClicked;
+	FGridSlotEvent OnSlotHovered;
+	FGridSlotEvent OnSlotUnhovered;
 	
 private:
 	int32 SlotIndex = INDEX_NONE;

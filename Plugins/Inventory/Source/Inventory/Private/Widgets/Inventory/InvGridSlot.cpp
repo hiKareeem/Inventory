@@ -3,6 +3,26 @@
 
 #include "Widgets/Inventory/InvGridSlot.h"
 
+void UInvGridSlot::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
+
+	OnSlotHovered.Broadcast(SlotIndex, InMouseEvent);
+}
+
+void UInvGridSlot::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseLeave(InMouseEvent);
+
+	OnSlotUnhovered.Broadcast(SlotIndex, InMouseEvent);
+}
+
+FReply UInvGridSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	OnSlotClicked.Broadcast(SlotIndex, InMouseEvent);
+	return FReply::Handled();
+}
+
 void UInvGridSlot::SetUnoccupiedTexture()
 {
 	SlotState = EInvGridSlotState::Unoccupied;
