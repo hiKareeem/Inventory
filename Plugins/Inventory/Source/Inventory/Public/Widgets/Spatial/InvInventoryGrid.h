@@ -5,8 +5,10 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Items/InvInventoryItem.h"
+#include "Items/Fragments/InvItemFragment.h"
 #include "InvInventoryGrid.generated.h"
 
+class UInvSlottedItem;
 class UInvItemComponent;
 class UInvInventoryItem;
 class UInvInventoryComponent;
@@ -35,6 +37,12 @@ private:
 	FInvSlotAvailabilityResult HasRoomForItem(const UInvInventoryItem* Item) const;
 	FInvSlotAvailabilityResult HasRoomForItem(const FInvItemManifest& Manifest) const;
 	void AddItemToIndices(const FInvSlotAvailabilityResult& Result, UInvInventoryItem* Item);
+	UInvSlottedItem* CreateSlottedItem(UInvInventoryItem* Item, int32 Index, const FInvGridFragment* GridFragment,
+	                       const FInvImageFragment* ImageFragment) const;
+	FVector2D GetDrawSize(const FInvGridFragment* GridFragment) const;
+	void SetSlottedItemImage(const UInvSlottedItem* SlottedItem, const FInvGridFragment* GridFragment, const FInvImageFragment* ImageFragment) const;
+	void AddItemAtIndex(UInvInventoryItem* Item, const int32 Index, const bool bStackable, const int32 StackAmount);
+	void AddSlottedItemToCanvas(const int32 Index, const FInvGridFragment* GridFragment, UInvSlottedItem* SlottedItem) const;
 
 	TWeakObjectPtr<UInvInventoryComponent> InventoryComponent;
 
@@ -43,6 +51,12 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UCanvasPanel> CanvasPanel;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	TSubclassOf<UInvSlottedItem> SlottedItemClass;
+
+	UPROPERTY()
+	TMap<int32, TObjectPtr<UInvSlottedItem>> SlottedItems;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	EInvItemCategory ItemCategory;

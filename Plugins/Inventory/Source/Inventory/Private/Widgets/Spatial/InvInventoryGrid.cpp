@@ -12,6 +12,7 @@
 #include "Items/Fragments/InvFragmentTags.h"
 #include "Items/Fragments/InvItemFragment.h"
 #include "Widgets/Inventory/InvGridSlot.h" 
+#include "Widgets/Inventory/InvSlottedItem.h"
 #include "Widgets/Utils/InvWidgetUtils.h"
 
 void UInvInventoryGrid::NativeOnInitialized()
@@ -57,9 +58,59 @@ void UInvInventoryGrid::AddItem(UInvInventoryItem* Item)
 
 void UInvInventoryGrid::AddItemToIndices(const FInvSlotAvailabilityResult& Result, UInvInventoryItem* Item)
 {
+	for (const FInvSlotAvailability& SlotAvailability : Result.SlotAvailabilities)
+	{
+		AddItemAtIndex(Item, SlotAvailability.Index, Result.bStackable, SlotAvailability.AmountToFill);
+	}	
+}
+
+UInvSlottedItem* UInvInventoryGrid::CreateSlottedItem(UInvInventoryItem* Item, const int32 Index, const FInvGridFragment* GridFragment, const FInvImageFragment* ImageFragment) const
+{
+	UInvSlottedItem* SlottedItem = CreateWidget<UInvSlottedItem>(GetOwningPlayer(), SlottedItemClass);
+	SlottedItem->SetItem(Item);
+	SetSlottedItemImage(SlottedItem, GridFragment, ImageFragment);
+	SlottedItem->SetGridIndex(Index);
+	return SlottedItem; 
+}
+
+void UInvInventoryGrid::AddItemAtIndex(UInvInventoryItem* Item, const int32 Index, const bool bStackable,
+                                       const int32 StackAmount)
+{
 	const FInvGridFragment* GridFragment = GetFragment<FInvGridFragment>(Item, FragmentTags::GridFragment);
 	const FInvImageFragment* ImageFragment = GetFragment<FInvImageFragment>(Item, FragmentTags::ImageFragment);
 	if (!GridFragment || !ImageFragment) return;
+
+	UInvSlottedItem* SlottedItem = CreateSlottedItem(Item, Index, GridFragment, ImageFragment);
+	AddSlottedItemToCanvas(Index, GridFragment, SlottedItem);
+
+	SlottedItems.Add(Index, SlottedItem);
+}
+
+void UInvInventoryGrid::AddSlottedItemToCanvas(const int32 Index, const FInvGridFragment* GridFragment,
+	UInvSlottedItem* SlottedItem) const
+{
+	CanvasPanel->AddChildToCanvas(SlottedItem);
+	UCanvasPanelSlot* CanvasPanelSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(SlottedItem);
+	CanvasPanelSlot->SetSize(GetDrawSize(GridFragment));
+	const FVector2D DrawPosition = UInvWidgetUtils::GetSlotPositionFromIndex(Index, Columns) * SlotSize;
+	const FVector2D DrawPositionWithPadding = DrawPosition + FVector2D(GridFragment->GetGridPadding());
+	CanvasPanelSlot->SetPosition(DrawPositionWithPadding);
+}
+
+void UInvInventoryGrid::SetSlottedItemImage(const UInvSlottedItem* SlottedItem, const FInvGridFragment* GridFragment,
+                                            const FInvImageFragment* ImageFragment) const
+{
+	FSlateBrush Brush;
+	Brush.SetResourceObject(ImageFragment->GetImage());
+	Brush.DrawAs = ESlateBrushDrawType::Image;
+	Brush.ImageSize = GetDrawSize(GridFragment);
+	SlottedItem->SetImage(Brush);
+}
+
+FVector2D UInvInventoryGrid::GetDrawSize(const FInvGridFragment* GridFragment) const
+{
+	const float IconTileWidth = SlotSize - GridFragment->GetGridPadding() * 2;
+	return GridFragment->GetGridSize() * IconTileWidth;
 }
 
 void UInvInventoryGrid::ConstructGrid()

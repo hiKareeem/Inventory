@@ -16,4 +16,5 @@ class INVENTORY_API UInvWidgetUtils : public UBlueprintFunctionLibrary
 
 public:
 	static int32 GetIndexFromSlotPosition(FIntPoint SlotPosition, const int32 Columns);
+	static FIntPoint GetSlotPositionFromIndex(int32 Index, const int32 Columns);
 };

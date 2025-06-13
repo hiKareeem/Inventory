@@ -7,3 +7,8 @@ int32 UInvWidgetUtils::GetIndexFromSlotPosition(const FIntPoint SlotPosition, co
 {
 	return SlotPosition.Y * Columns + SlotPosition.X;
 }
+
+FIntPoint UInvWidgetUtils::GetSlotPositionFromIndex(int32 Index, const int32 Columns)
+{
+	return FIntPoint(Index % Columns, Index / Columns);
+}
