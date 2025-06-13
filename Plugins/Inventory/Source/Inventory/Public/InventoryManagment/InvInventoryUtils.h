@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Widgets/Utils/InvWidgetUtils.h"
 #include "InvInventoryUtils.generated.h"
 
 class UInvItemComponent;
@@ -23,4 +24,25 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Inventory", meta = (WorldContext = "WorldContextObject"))
 	static EInvItemCategory GetItemCategoryFromItemComponent(UInvItemComponent* ItemComponent);
+
+	template <typename T, typename FuncT>
+	static void ForEach2D(TArray<T>& Array, int32 Index, const FIntPoint& Range2D, int32 GridColumns, const FuncT& Func);
 };
+
+template <typename T, typename FuncT>
+void UInvInventoryUtils::ForEach2D(TArray<T>& Array, int32 Index, const FIntPoint& Range2D, int32 GridColumns, const FuncT& Func)
+{
+	for (int32 Row = 0; Row < Range2D.Y; Row++)
+	{
+		for (int32 Column = 0; Column < Range2D.X; Column++)
+		{
+			const FIntPoint Coordinates = UInvWidgetUtils::GetSlotPositionFromIndex(Index, GridColumns) + FIntPoint(Column, Row);
+			const int32 TileIndex = UInvWidgetUtils::GetIndexFromSlotPosition(Coordinates, GridColumns);
+
+			if (Array.IsValidIndex(TileIndex))
+			{
+				Func(Array[TileIndex]);
+			}
+		}
+	}
+}

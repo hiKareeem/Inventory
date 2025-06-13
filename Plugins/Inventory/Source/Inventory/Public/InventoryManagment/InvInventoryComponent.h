@@ -7,12 +7,14 @@
 #include "Components/ActorComponent.h"
 #include "InvInventoryComponent.generated.h"
 
+struct FInvSlotAvailabilityResult;
 class UInvItemComponent;
 class UInvInventoryItem;
 class UInvInventoryWidgetBase;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryItemChanged, UInvInventoryItem*, Item);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FInventoryFull);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStackChanged, const FInvSlotAvailabilityResult&, Result);
 
 UCLASS(Blueprintable, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class INVENTORY_API UInvInventoryComponent : public UActorComponent
@@ -37,6 +39,7 @@ public:
 	FInventoryItemChanged OnItemAdded;
 	FInventoryItemChanged OnItemRemoved;
 	FInventoryFull OnInventoryFull;
+	FStackChanged OnStackChanged;
 
 protected:
 	virtual void BeginPlay() override;

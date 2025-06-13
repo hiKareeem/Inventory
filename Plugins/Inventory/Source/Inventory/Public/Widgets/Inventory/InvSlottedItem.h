@@ -7,6 +7,7 @@
 #include "Components/Image.h"
 #include "InvSlottedItem.generated.h"
 
+class UTextBlock;
 class UImage;
 class UInvInventoryItem;
 /**
@@ -33,9 +34,14 @@ public:
 	UInvInventoryItem* GetItem() const { return Item.Get(); }
 	void SetItem(UInvInventoryItem* NewItem);
 
+	void SetStackCount(const int32 Count);
+
 private:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UImage> Image_Item;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UTextBlock> Text_StackCount;
 
 	int32 GridIndex;
 	FIntPoint GridDimensions;

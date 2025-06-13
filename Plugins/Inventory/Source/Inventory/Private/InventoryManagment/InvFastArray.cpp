@@ -81,3 +81,13 @@ void FInvInventoryFastArray::RemoveEntry(UInvInventoryItem* Item)
 		}
 	}
 }
+
+UInvInventoryItem* FInvInventoryFastArray::FindFirstItemByTag(const FGameplayTag& Tag) const
+{
+	auto* FoundEntry = Entries.FindByPredicate(
+		[Tag](const FInvInventoryEntry& Entry)
+		{
+			return IsValid(Entry.Item) && Entry.Item->GetItemManifest().GetItemTag().MatchesTagExact(Tag);
+		});
+	return FoundEntry ? FoundEntry->Item : nullptr; 
+}

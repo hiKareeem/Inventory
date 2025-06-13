@@ -27,22 +27,46 @@ public:
 	virtual void NativeOnInitialized() override;
 	
 	EInvItemCategory GetItemCategory() const { return ItemCategory; }
-	FInvSlotAvailabilityResult HasRoomForItem(const UInvItemComponent* ItemComponent) const;
+	FInvSlotAvailabilityResult HasRoomForItem(const UInvItemComponent* ItemComponent);
 
 	UFUNCTION()
 	void AddItem(UInvInventoryItem* Item);
 
 private:
 	void ConstructGrid();
-	FInvSlotAvailabilityResult HasRoomForItem(const UInvInventoryItem* Item) const;
-	FInvSlotAvailabilityResult HasRoomForItem(const FInvItemManifest& Manifest) const;
+	FInvSlotAvailabilityResult HasRoomForItem(const UInvInventoryItem* Item);
+	FInvSlotAvailabilityResult HasRoomForItem(const FInvItemManifest& Manifest);
+	bool HasRoomAtIndex(const UInvGridSlot* GridSlot,
+						const FIntPoint& Dimensions,
+						const TSet<int32>& CheckedIndices,
+						TSet<int32>& OutTentativelyClaimed,
+						const FGameplayTag& ItemType,
+						const int32 MaxStackSize);
 	void AddItemToIndices(const FInvSlotAvailabilityResult& Result, UInvInventoryItem* Item);
-	UInvSlottedItem* CreateSlottedItem(UInvInventoryItem* Item, int32 Index, const FInvGridFragment* GridFragment,
-	                       const FInvImageFragment* ImageFragment) const;
+	UInvSlottedItem* CreateSlottedItem(UInvInventoryItem* Item,
+										const int32 Index,
+										const bool bStackable,
+										int32 StackAmount,
+										const FInvGridFragment* GridFragment,
+									    const FInvImageFragment* ImageFragment) const;
 	FVector2D GetDrawSize(const FInvGridFragment* GridFragment) const;
 	void SetSlottedItemImage(const UInvSlottedItem* SlottedItem, const FInvGridFragment* GridFragment, const FInvImageFragment* ImageFragment) const;
 	void AddItemAtIndex(UInvInventoryItem* Item, const int32 Index, const bool bStackable, const int32 StackAmount);
 	void AddSlottedItemToCanvas(const int32 Index, const FInvGridFragment* GridFragment, UInvSlottedItem* SlottedItem) const;
+	void UpdateGridSlots(UInvInventoryItem* Item, const int32 Index, bool bStackable, int32 StackAmount);
+	FIntPoint GetDimensions(const FInvItemManifest& Manifest) const;
+	bool CheckSlotConstraints(const UInvGridSlot* GridSlot, const UInvGridSlot* SubGridSlot,
+	                          const TSet<int32>& CheckedIndices, TSet<int32>&
+	                          TentativelyClaimedIndices, const FGameplayTag& ItemTag, const int32 MaxStackSize) const;
+	bool HasValidItem(const UInvGridSlot* GridSlot) const;
+	bool IsUpperLeftSlot(const UInvGridSlot* GridSlot, const UInvGridSlot* SubGridSlot) const;
+	bool DoesItemTypeMatch(const UInvInventoryItem* Item, const FGameplayTag& ItemTag) const;
+	bool IsInGridBounds(const int32 StartingIndex, const FIntPoint& Dimensions) const;
+	int32 DetermineFillAmountForSlot(const bool bStackable, const int32 MaxStackSize, const int32 AmountToFill, const UInvGridSlot* GridSlot) const;
+	int32 GetStackAmount(const UInvGridSlot* GridSlot) const;
+
+	UFUNCTION()
+	void AddStacks(const FInvSlotAvailabilityResult& Result);
 
 	TWeakObjectPtr<UInvInventoryComponent> InventoryComponent;
 

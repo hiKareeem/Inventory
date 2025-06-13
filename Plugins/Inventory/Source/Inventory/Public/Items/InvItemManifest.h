@@ -21,6 +21,12 @@ public:
 	template<typename T> requires std::derived_from<T, FInvItemFragment>
 	const T* GetFragmentByTag(const FGameplayTag& FragmentTag) const;
 
+	template<typename T> requires std::derived_from<T, FInvItemFragment>
+	const T* GetFragment() const;
+	
+	template<typename T> requires std::derived_from<T, FInvItemFragment>
+	T* GetFragmentMutable();
+
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory", meta = (ExcludeBaseStruct))
 	TArray<TInstancedStruct<FInvItemFragment>> Fragments;
@@ -40,6 +46,32 @@ const T* FInvItemManifest::GetFragmentByTag(const FGameplayTag& FragmentTag) con
 		if (const T* FoundFragment = Fragment.GetPtr<T>())
 		{
 			if (!FoundFragment->GetFragmentTag().MatchesTagExact(FragmentTag)) continue;
+			return FoundFragment; 
+		}
+	}	
+	return nullptr;
+}
+
+template<typename T> requires std::derived_from<T, FInvItemFragment>
+const T* FInvItemManifest::GetFragment() const
+{
+	for (const TInstancedStruct<FInvItemFragment>& Fragment : Fragments)
+	{
+		if (const T* FoundFragment = Fragment.GetPtr<T>())
+		{
+			return FoundFragment; 
+		}
+	}	
+	return nullptr;
+}
+
+template <typename T> requires std::derived_from<T, FInvItemFragment>
+T* FInvItemManifest::GetFragmentMutable()
+{
+	for (TInstancedStruct<FInvItemFragment>& Fragment : Fragments)
+	{
+		if (T* FoundFragment = Fragment.GetMutablePtr<T>())
+		{
 			return FoundFragment; 
 		}
 	}	

@@ -17,3 +17,9 @@ void UInvItemComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Ou
 
 	DOREPLIFETIME(UInvItemComponent, ItemManifest);
 }
+
+void UInvItemComponent::PickedUp()
+{
+	OnPickedUp();	
+	GetOwner()->Destroy();
+}

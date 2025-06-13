@@ -58,3 +58,20 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	FVector2D ImageSize = FVector2D(100.f, 100.f);
 };
+
+USTRUCT(BlueprintType)
+struct FInvStackableFragment : public FInvItemFragment
+{
+	GENERATED_BODY()
+
+	int32 GetMaxStack() const { return MaxStack; }
+	int32 GetCurrentStack() const { return CurrentStack; }
+	void SetCurrentStack(int32 InCurrentStack) { CurrentStack = InCurrentStack; }
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	int32 MaxStack = 1;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	int32 CurrentStack = 1;
+};

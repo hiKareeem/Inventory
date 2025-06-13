@@ -4,7 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/Image.h"
+#include "Items/InvInventoryItem.h"
 #include "InvGridSlot.generated.h"
+
+UENUM(BlueprintType)
+enum class EInvGridSlotState : uint8
+{
+	Unoccupied = 0 UMETA(DisplayName = "Unoccupied"),
+	Occupied = 1 UMETA(DisplayName = "Occupied"),
+	Selected = 2 UMETA(DisplayName = "Selected"),
+	Invalid = 3 UMETA(DisplayName = "Invalid")
+};
 
 /**
  * 
@@ -17,7 +28,41 @@ class INVENTORY_API UInvGridSlot : public UUserWidget
 public:
 	int32 GetIndex() const { return SlotIndex; }
 	void SetIndex(int32 Index) { SlotIndex = Index; }
+	EInvGridSlotState GetState() const { return SlotState; }
+	TWeakObjectPtr<UInvInventoryItem> GetItem() const { return Item; }
+	void SetItem(UInvInventoryItem* InItem) { Item = InItem; }
+	int32 GetStackCount() const { return StackCount; }
+	void SetStackCount(int32 Count) { StackCount = Count; }
+	int32 GetUpperLeftIndex() const { return UpperLeftIndex; }
+	void SetUpperLeftIndex(int32 Index) { UpperLeftIndex = Index; }
+	bool IsAvailable() const { return bAvailable; }
+	void SetAvailable(bool bInAvailable) { bAvailable = bInAvailable; }
+	
+	void SetUnoccupiedTexture();
+	void SetOccupiedTexture();
+	void SetSelectedTexture();
+	void SetInvalidTexture();
 	
 private:
 	int32 SlotIndex = -1;
+	int32 StackCount = 0;
+	int32 UpperLeftIndex = INDEX_NONE;
+	bool bAvailable = false;
+	TWeakObjectPtr<UInvInventoryItem> Item;
+	EInvGridSlotState SlotState = EInvGridSlotState::Unoccupied;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	FSlateBrush Brush_Unoccupied;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	FSlateBrush Brush_Occupied;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	FSlateBrush Brush_Selected;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	FSlateBrush Brush_Invalid;
+	
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UImage> Image_Slot;
 };
