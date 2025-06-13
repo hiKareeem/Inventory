@@ -8,6 +8,7 @@
 #include "Items/Fragments/InvItemFragment.h"
 #include "InvInventoryGrid.generated.h"
 
+class UInvHoverItem;
 class UInvSlottedItem;
 class UInvItemComponent;
 class UInvInventoryItem;
@@ -64,9 +65,19 @@ private:
 	bool IsInGridBounds(const int32 StartingIndex, const FIntPoint& Dimensions) const;
 	int32 DetermineFillAmountForSlot(const bool bStackable, const int32 MaxStackSize, const int32 AmountToFill, const UInvGridSlot* GridSlot) const;
 	int32 GetStackAmount(const UInvGridSlot* GridSlot) const;
+	
+	bool IsRightClick(const FPointerEvent& MouseEvent) const;
+	bool IsLeftClick(const FPointerEvent& MouseEvent) const;
+	void PickUpItem(UInvInventoryItem* ClickedItem, const int32 GridIndex);
+	void AssignHoveredItem(UInvInventoryItem* ClickedItem);
+	void AssignHoveredItem(UInvInventoryItem* ClickedItem, const int32 GridIndex, const int32 PreviousGridIndex);
+	void RemoveItemFromGrid(UInvInventoryItem* ClickedItem, const int32 GridIndex);
 
 	UFUNCTION()
 	void AddStacks(const FInvSlotAvailabilityResult& Result);
+
+	UFUNCTION()
+	void OnSlottedItemClicked(int32 GridIndex, const FPointerEvent& MouseEvent);
 
 	TWeakObjectPtr<UInvInventoryComponent> InventoryComponent;
 
@@ -81,6 +92,12 @@ private:
 
 	UPROPERTY()
 	TMap<int32, TObjectPtr<UInvSlottedItem>> SlottedItems;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
+	TSubclassOf<UInvHoverItem> HoveredItemClass;
+
+	UPROPERTY()
+	TObjectPtr<UInvHoverItem> HoveredItem;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	EInvItemCategory ItemCategory;

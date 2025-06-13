@@ -5,6 +5,12 @@
 #include "Components/TextBlock.h"
 #include "Items/InvInventoryItem.h"
 
+FReply UInvSlottedItem::NativeOnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent)
+{
+	OnSlottedItemClicked.Broadcast(GridIndex, MouseEvent);
+	return FReply::Handled();
+}
+
 void UInvSlottedItem::SetItem(UInvInventoryItem* NewItem)
 {
 	Item = NewItem;
