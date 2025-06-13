@@ -9,6 +9,8 @@
 #include "InventoryManagment/InvInventoryComponent.h"
 #include "InventoryManagment/InvInventoryUtils.h"
 #include "Items/InvItemComponent.h"
+#include "Items/Fragments/InvFragmentTags.h"
+#include "Items/Fragments/InvItemFragment.h"
 #include "Widgets/Inventory/InvGridSlot.h" 
 #include "Widgets/Utils/InvWidgetUtils.h"
 
@@ -36,6 +38,12 @@ FInvSlotAvailabilityResult UInvInventoryGrid::HasRoomForItem(const FInvItemManif
 {
 	FInvSlotAvailabilityResult Result;
 	Result.TotalRoomToFill = 1;
+
+	FInvSlotAvailability SlotAvailability;
+	SlotAvailability.AmountToFill = 1;
+	SlotAvailability.Index = 0;
+	Result.SlotAvailabilities.Add(MoveTemp(SlotAvailability));
+	
 	return Result;
 }
 
@@ -44,6 +52,14 @@ void UInvInventoryGrid::AddItem(UInvInventoryItem* Item)
 	if (!MatchesCategory(Item)) return;
 
 	FInvSlotAvailabilityResult Result = HasRoomForItem(Item);
+	AddItemToIndices(Result, Item);
+}
+
+void UInvInventoryGrid::AddItemToIndices(const FInvSlotAvailabilityResult& Result, UInvInventoryItem* Item)
+{
+	const FInvGridFragment* GridFragment = GetFragment<FInvGridFragment>(Item, FragmentTags::GridFragment);
+	const FInvImageFragment* ImageFragment = GetFragment<FInvImageFragment>(Item, FragmentTags::ImageFragment);
+	if (!GridFragment || !ImageFragment) return;
 }
 
 void UInvInventoryGrid::ConstructGrid()

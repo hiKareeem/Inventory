@@ -34,6 +34,7 @@ private:
 	void ConstructGrid();
 	FInvSlotAvailabilityResult HasRoomForItem(const UInvInventoryItem* Item) const;
 	FInvSlotAvailabilityResult HasRoomForItem(const FInvItemManifest& Manifest) const;
+	void AddItemToIndices(const FInvSlotAvailabilityResult& Result, UInvInventoryItem* Item);
 
 	TWeakObjectPtr<UInvInventoryComponent> InventoryComponent;
 

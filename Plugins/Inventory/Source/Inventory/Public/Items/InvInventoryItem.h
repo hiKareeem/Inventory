@@ -28,3 +28,12 @@ private:
 	UPROPERTY(VisibleAnywhere, Replicated, meta = (BaseStruct = "/Script/Inventory.InvItemManifest"), Category = "Inventory")
 	FInstancedStruct ItemManifest;
 };
+
+template<typename FragmentType>
+const FragmentType* GetFragment(const UInvInventoryItem* Item, const FGameplayTag& FragmentTag)
+{
+	if (!IsValid(Item)) return nullptr;
+
+	const FInvItemManifest& Manifest = Item->GetItemManifest();
+	return Manifest.GetFragmentByTag<FragmentType>(FragmentTag);
+}
