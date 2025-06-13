@@ -6,6 +6,8 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "InvInventoryUtils.generated.h"
 
+class UInvItemComponent;
+enum class EInvItemCategory : uint8;
 class UInvInventoryComponent;
 /**
  * 
@@ -18,4 +20,7 @@ class INVENTORY_API UInvInventoryUtils : public UBlueprintFunctionLibrary
 public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory", meta = (WorldContext = "WorldContextObject"))
 	static UInvInventoryComponent* GetInventoryComponent(const APlayerController* PlayerController);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory", meta = (WorldContext = "WorldContextObject"))
+	static EInvItemCategory GetItemCategoryFromItemComponent(UInvItemComponent* ItemComponent);
 };

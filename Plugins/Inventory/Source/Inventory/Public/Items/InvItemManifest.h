@@ -6,6 +6,8 @@
 #include "StructUtils/InstancedStruct.h"
 #include "InvItemManifest.generated.h"
 
+struct FInvItemFragment;
+
 USTRUCT(BlueprintType)
 struct INVENTORY_API FInvItemManifest
 {
@@ -16,6 +18,9 @@ public:
 	EInvItemCategory GetCategory() const { return Category; }
 
 private:
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory", meta = (ExcludeBaseStruct))
+	TArray<TInstancedStruct<FInvItemFragment>> Fragments;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	EInvItemCategory Category = EInvItemCategory::None;
 

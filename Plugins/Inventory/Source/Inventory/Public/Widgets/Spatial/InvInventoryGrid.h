@@ -7,6 +7,7 @@
 #include "Items/InvInventoryItem.h"
 #include "InvInventoryGrid.generated.h"
 
+class UInvItemComponent;
 class UInvInventoryItem;
 class UInvInventoryComponent;
 class UCanvasPanel;
@@ -24,12 +25,15 @@ public:
 	virtual void NativeOnInitialized() override;
 	
 	EInvItemCategory GetItemCategory() const { return ItemCategory; }
+	FInvSlotAvailabilityResult HasRoomForItem(const UInvItemComponent* ItemComponent) const;
 
 	UFUNCTION()
 	void AddItem(UInvInventoryItem* Item);
 
 private:
 	void ConstructGrid();
+	FInvSlotAvailabilityResult HasRoomForItem(const UInvInventoryItem* Item) const;
+	FInvSlotAvailabilityResult HasRoomForItem(const FInvItemManifest& Manifest) const;
 
 	TWeakObjectPtr<UInvInventoryComponent> InventoryComponent;
 

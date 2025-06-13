@@ -3,9 +3,16 @@
 
 #include "Widgets/Spatial/InvSpatialInventoryWidget.h"
 
-FInvSlotAvailabilityResult UInvSpatialInventoryWidget::HasRoomForItem(const UInvItemComponent* ItemComponent) const
+#include "InventoryManagment/InvInventoryUtils.h"
+#include "Widgets/Spatial/InvInventoryGrid.h"
+
+FInvSlotAvailabilityResult UInvSpatialInventoryWidget::HasRoomForItem(UInvItemComponent* ItemComponent) const
 {
-	FInvSlotAvailabilityResult Result;
-	Result.TotalRoomToFill = 1;
-	return Result;
+	switch (UInvInventoryUtils::GetItemCategoryFromItemComponent(ItemComponent))
+	{
+		case EInvItemCategory::Equippable:
+			return InventoryGrid->HasRoomForItem(ItemComponent);
+		default:
+			return FInvSlotAvailabilityResult();
+	};
 }
