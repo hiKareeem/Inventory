@@ -4,8 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Items/InvInventoryItem.h"
 #include "InvInventoryGrid.generated.h"
 
+class UInvInventoryItem;
+class UInvInventoryComponent;
 class UCanvasPanel;
 class UInvGridSlot;
 enum class EInvItemCategory : uint8;
@@ -22,8 +25,13 @@ public:
 	
 	EInvItemCategory GetItemCategory() const { return ItemCategory; }
 
+	UFUNCTION()
+	void AddItem(UInvInventoryItem* Item);
+
 private:
 	void ConstructGrid();
+
+	TWeakObjectPtr<UInvInventoryComponent> InventoryComponent;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
 	TSubclassOf<UInvGridSlot> GridSlotClass;
@@ -45,4 +53,6 @@ private:
 	
 	UPROPERTY()
 	TArray<TObjectPtr<UInvGridSlot>> GridSlots;
+
+	bool MatchesCategory(const UInvInventoryItem* Item) const { return Item->GetItemManifest().GetCategory() == ItemCategory; }
 };

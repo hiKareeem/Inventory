@@ -8,7 +8,7 @@
 #include "Widgets/Inventory/InvInventoryWidgetBase.h"
 
 
-UInvInventoryComponent::UInvInventoryComponent()
+UInvInventoryComponent::UInvInventoryComponent() : InventoryList(this)
 {
 	PrimaryComponentTick.bCanEverTick = false;
 	SetIsReplicatedByDefault(true);
@@ -53,7 +53,11 @@ void UInvInventoryComponent::AddRepSubobject(UObject* Subobject)
 void UInvInventoryComponent::Server_AddNewItem_Implementation(UInvItemComponent* ItemComponent, int32 StackCount)
 {
 	UInvInventoryItem* Item = InventoryList.AddEntry(ItemComponent);
-	
+
+	if (GetOwner()->GetNetMode() == NM_ListenServer || GetOwner()->GetNetMode() == NM_Standalone)
+	{
+		OnItemAdded.Broadcast(Item);
+	}
 }
 
 void UInvInventoryComponent::Server_AddStackableItem_Implementation(UInvItemComponent* ItemComponent, int32 StackCount,

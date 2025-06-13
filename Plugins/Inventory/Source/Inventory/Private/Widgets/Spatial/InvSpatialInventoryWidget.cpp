@@ -5,5 +5,7 @@
 
 FInvSlotAvailabilityResult UInvSpatialInventoryWidget::HasRoomForItem(const UInvItemComponent* ItemComponent) const
 {
-	return FInvSlotAvailabilityResult();
+	FInvSlotAvailabilityResult Result;
+	Result.TotalRoomToFill = 1;
+	return Result;
 }

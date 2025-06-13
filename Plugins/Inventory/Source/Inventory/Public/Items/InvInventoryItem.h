@@ -17,8 +17,10 @@ class INVENTORY_API UInvInventoryItem : public UObject
 	
 public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual bool IsSupportedForNetworking() const override { return true; }
 
-	//UInvItemManifest* GetItemManifest() const { return ItemManifest.Get(); }
+	const FInvItemManifest& GetItemManifest() const { return ItemManifest.Get<FInvItemManifest>(); }
+	FInvItemManifest& GetMutableItemManifest() { return ItemManifest.GetMutable<FInvItemManifest>(); }
 	void SetItemManifest(const FInvItemManifest& Manifest);
 	
 private:

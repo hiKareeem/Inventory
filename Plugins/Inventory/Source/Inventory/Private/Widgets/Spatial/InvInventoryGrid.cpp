@@ -6,6 +6,8 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
+#include "InventoryManagment/InvInventoryComponent.h"
+#include "InventoryManagment/InvInventoryUtils.h"
 #include "Widgets/Inventory/InvGridSlot.h" 
 #include "Widgets/Utils/InvWidgetUtils.h"
 
@@ -14,6 +16,16 @@ void UInvInventoryGrid::NativeOnInitialized()
 	Super::NativeOnInitialized();
 
 	ConstructGrid();
+
+	InventoryComponent = UInvInventoryUtils::GetInventoryComponent(GetOwningPlayer());
+	InventoryComponent->OnItemAdded.AddDynamic(this, &UInvInventoryGrid::AddItem);
+}
+
+void UInvInventoryGrid::AddItem(UInvInventoryItem* Item)
+{
+	if (!MatchesCategory(Item)) return;
+
+	UE_LOG(LogTemp, Warning, TEXT("Item added to grid: %s"), *Item->GetName());
 }
 
 void UInvInventoryGrid::ConstructGrid()
