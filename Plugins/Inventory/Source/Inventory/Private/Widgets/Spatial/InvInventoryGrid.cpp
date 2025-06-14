@@ -521,6 +521,114 @@ void UInvInventoryGrid::ClearHoveredItem()
 
 	HoveredItem->RemoveFromParent();
 	HoveredItem = nullptr;
+
+	ShowCursor();
+}
+
+bool UInvInventoryGrid::IsSameStackable(const UInvInventoryItem* ClickedItem) const
+{
+	const bool bSameItem = ClickedItem == HoveredItem->GetItem();
+	const bool bIsStackable = ClickedItem->IsStackable();
+
+	return bSameItem && bIsStackable && HoveredItem->GetItemTag().MatchesTagExact(ClickedItem->GetItemManifest().GetItemTag());
+}
+
+void UInvInventoryGrid::SwapWithHoveredItem(UInvInventoryItem* ClickedItem, const int32 GridIndex)
+{
+	if (!IsValid(HoveredItem)) return;
+
+	UInvInventoryItem* TempItem = HoveredItem->GetItem();
+	const int32 TempStackCount = HoveredItem->GetStackCount();
+	const bool bTempStackable = HoveredItem->IsStackable();
+
+	AssignHoveredItem(ClickedItem, GridIndex, HoveredItem->GetPreviousIndex());
+	RemoveItemFromGrid(ClickedItem, GridIndex);
+	AddItemAtIndex(TempItem, ItemDropIndex, bTempStackable, TempStackCount);
+	UpdateGridSlots(TempItem, ItemDropIndex, bTempStackable, TempStackCount);
+}
+
+bool UInvInventoryGrid::ShouldSwapStackCounts(const int32 RoomInClickedSlot, const int32 HoveredStackCount,
+	const int32 MaxStackSize) const
+{
+	return RoomInClickedSlot == 0 && HoveredStackCount < MaxStackSize;
+}
+
+void UInvInventoryGrid::SwapStackCounts(const int32 ClickedStackCount, const int32 HoveredStackCount, const int32 Index)
+{
+	UInvGridSlot* GridSlot = GridSlots[Index];
+	GridSlot->SetStackCount(HoveredStackCount);
+
+	UInvSlottedItem* SlottedItem = SlottedItems.FindChecked(Index);
+	SlottedItem->SetStackCount(HoveredStackCount);
+
+	HoveredItem->UpdateStackCount(ClickedStackCount);
+}
+
+bool UInvInventoryGrid::ShouldConsumeHoveredItemStacks(const int32 HoveredStackCount,
+	const int32 RoomInClickedSlot) const
+{
+	return RoomInClickedSlot >= HoveredStackCount;
+}
+
+void UInvInventoryGrid::ConsumeHoveredItemStacks(const int32 ClickedStackCount, const int32 HoveredStackCount,
+	const int32 Index)
+{
+	const int32 AmountToTransfer = HoveredStackCount;
+	const int32 NewClickedStackCount = ClickedStackCount + AmountToTransfer;
+
+	GridSlots[Index]->SetStackCount(NewClickedStackCount);
+	SlottedItems.FindChecked(Index)->SetStackCount(NewClickedStackCount);
+	ClearHoveredItem();
+	ShowCursor();
+
+	const FInvGridFragment* GridFragment = GridSlots[Index]->GetItem()->GetItemManifest().GetFragment<FInvGridFragment>();
+	const FIntPoint Dimensions = GridFragment ? GridFragment->GetGridSize() : FIntPoint(1, 1);
+	HighlightSlots(Index, Dimensions);
+}
+
+void UInvInventoryGrid::FillInStack(const int32 FillAmount, const int32 Remainder, const int32 Index)
+{
+	UInvGridSlot* GridSlot = GridSlots[Index];
+	const int32 NewStackCount = GridSlot->GetStackCount() + FillAmount;
+
+	GridSlot->SetStackCount(NewStackCount);
+
+	UInvSlottedItem* ClickedSlottedItem = SlottedItems.FindChecked(Index);
+	ClickedSlottedItem->SetStackCount(NewStackCount);
+
+	HoveredItem->UpdateStackCount(Remainder);
+}
+
+UUserWidget* UInvInventoryGrid::GetVisibleCursorWidget()
+{
+	if (!IsValid(GetOwningPlayer())) return nullptr;
+	if (!IsValid(VisibleCursorClass))
+	{
+		VisibleCursorWidget = CreateWidget<UUserWidget>(GetOwningPlayer(), VisibleCursorClass);
+	}
+	return VisibleCursorWidget;
+}
+
+UUserWidget* UInvInventoryGrid::GetHiddenCursorWidget()
+{
+	if (!IsValid(GetOwningPlayer())) return nullptr;
+	if (!IsValid(HiddenCursorClass))
+	{
+		HiddenCursorWidget = CreateWidget<UUserWidget>(GetOwningPlayer(), HiddenCursorClass);
+	}
+	return HiddenCursorWidget;
+}
+
+void UInvInventoryGrid::ShowCursor()
+{
+	if (!IsValid(GetOwningPlayer())) return;
+	GetOwningPlayer()->SetMouseCursorWidget(EMouseCursor::Default, GetVisibleCursorWidget());
+}
+
+void UInvInventoryGrid::HideCursor()
+{
+	if (!IsValid(GetOwningPlayer())) return;
+	GetOwningPlayer()->SetMouseCursorWidget(EMouseCursor::Default, GetHiddenCursorWidget());
 }
 
 void UInvInventoryGrid::OnGridSlotHovered(const int32 GridIndex, const FPointerEvent& MouseEvent)
@@ -553,7 +661,41 @@ void UInvInventoryGrid::OnSlottedItemClicked(const int32 GridIndex, const FPoint
 	if (!IsValid(HoveredItem) && IsLeftClick(MouseEvent))
 	{
 		PickUpItem(ClickedItem, GridIndex);
+		return;
 	}
+
+	if (IsSameStackable(ClickedItem))
+	{
+		const int32 ClickedStackCount = GridSlots[GridIndex]->GetStackCount();
+		const FInvStackableFragment* StackableFragment = ClickedItem->GetItemManifest().GetFragment<FInvStackableFragment>();
+		const int32 MaxStackSize = StackableFragment->GetMaxStack();
+		const int32 RoomInClickedSlot = MaxStackSize - ClickedStackCount;
+
+		const int32 HoveredStackCount = HoveredItem->GetStackCount();
+		if (ShouldSwapStackCounts(RoomInClickedSlot, HoveredStackCount, MaxStackSize))
+		{
+			SwapStackCounts(ClickedStackCount, HoveredStackCount, GridIndex);
+			return;
+		}
+
+		if (ShouldConsumeHoveredItemStacks(HoveredStackCount, RoomInClickedSlot))
+		{
+			ConsumeHoveredItemStacks(ClickedStackCount, HoveredStackCount, GridIndex);
+			return;
+		}
+
+		if (RoomInClickedSlot < HoveredStackCount)
+		{
+			FillInStack(RoomInClickedSlot, HoveredStackCount - RoomInClickedSlot, GridIndex);
+			return;
+		}
+		if (RoomInClickedSlot == 0)
+		{
+			return;
+		}
+	}
+
+	SwapWithHoveredItem(ClickedItem, GridIndex);
 }
 
 bool UInvInventoryGrid::IsRightClick(const FPointerEvent& MouseEvent) const
