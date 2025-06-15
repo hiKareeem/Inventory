@@ -9,6 +9,7 @@
 #include "InvInventoryGrid.generated.h"
 
 enum class EInvGridSlotState : uint8;
+enum class EInvItemCategory : uint8;
 class UInvHoverItem;
 class UInvSlottedItem;
 class UInvItemComponent;
@@ -16,7 +17,6 @@ class UInvInventoryItem;
 class UInvInventoryComponent;
 class UCanvasPanel;
 class UInvGridSlot;
-enum class EInvItemCategory : uint8;
 /**
  * 
  */
