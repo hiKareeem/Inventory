@@ -806,10 +806,20 @@ void UInvInventoryGrid::ConstructGrid()
 FReply UInvInventoryGrid::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	// Only handle drag-and-drop placement if we're in dragging mode
-	if (bIsDragging && IsValid(HoveredItem) && CurrentSpaceQueryResult.bHasSpace)
+	if (bIsDragging && IsValid(HoveredItem))
 	{
-		// Place the item at the current hover position
-		PlaceAtIndex(ItemDropIndex);
+		if (CurrentSpaceQueryResult.bHasSpace)
+		{
+			// Place the item at the current hover position (empty space)
+			PlaceAtIndex(ItemDropIndex);
+		}
+		else if (CurrentSpaceQueryResult.ValidItem.IsValid() && GridSlots.IsValidIndex(CurrentSpaceQueryResult.UpperLeftIndex))
+		{
+			// Swap with the item at the current hover position (occupied space)
+			UInvInventoryItem* ClickedItem = CurrentSpaceQueryResult.ValidItem.Get();
+			SwapWithHoveredItem(ClickedItem, CurrentSpaceQueryResult.UpperLeftIndex);
+		}
+		
 		bIsDragging = false;
 		return FReply::Handled();
 	}
@@ -818,7 +828,6 @@ FReply UInvInventoryGrid::NativeOnMouseButtonUp(const FGeometry& InGeometry, con
 	bIsDragging = false;
 	
 	// For click-to-place, we need to let the event propagate to child widgets (GridSlots)
-	// Don't call Super::NativeOnMouseButtonUp as it might interfere
 	return FReply::Unhandled();
 }
 
