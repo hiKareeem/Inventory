@@ -36,6 +36,7 @@ public:
 
 	UFUNCTION()
 	void AddItem(UInvInventoryItem* Item);
+	bool HasHoverItem() const;
 
 private:
 	void ConstructGrid();

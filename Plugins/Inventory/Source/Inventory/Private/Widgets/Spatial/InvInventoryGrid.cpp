@@ -317,6 +317,11 @@ void UInvInventoryGrid::AddItem(UInvInventoryItem* Item)
 	AddItemToIndices(Result, Item);
 }
 
+bool UInvInventoryGrid::HasHoverItem() const
+{
+	return IsValid(HoveredItem);
+}
+
 void UInvInventoryGrid::AddItemToIndices(const FInvSlotAvailabilityResult& Result, UInvInventoryItem* Item)
 {
 	for (const FInvSlotAvailability& SlotAvailability : Result.SlotAvailabilities)
@@ -662,6 +667,8 @@ void UInvInventoryGrid::OnGridSlotUnhovered(const int32 GridIndex, const FPointe
 
 void UInvInventoryGrid::OnSlottedItemClicked(const int32 GridIndex, const FPointerEvent& MouseEvent)
 {
+	UInvInventoryUtils::ItemUnhovered(GetOwningPlayer());
+	
 	check(GridSlots.IsValidIndex(GridIndex));
 	UInvInventoryItem* ClickedItem = GridSlots[GridIndex]->GetItem().Get();
 

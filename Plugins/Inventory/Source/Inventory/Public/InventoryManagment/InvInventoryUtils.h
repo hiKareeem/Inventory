@@ -25,6 +25,12 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Inventory", meta = (WorldContext = "WorldContextObject"))
 	static EInvItemCategory GetItemCategoryFromItemComponent(UInvItemComponent* ItemComponent);
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory", meta = (WorldContext = "WorldContextObject"))
+	static void ItemHovered(APlayerController* PlayerController, UInvInventoryItem* Item);
+
+	UFUNCTION(BlueprintCallable, Category = "Inventory", meta = (WorldContext = "WorldContextObject"))
+	static void ItemUnhovered(APlayerController* PlayerController);
+	
 	template <typename T, typename FuncT>
 	static void ForEach2D(TArray<T>& Array, int32 Index, const FIntPoint& Range2D, int32 GridColumns, const FuncT& Func);
 };

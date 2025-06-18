@@ -41,6 +41,8 @@ public:
 	FInventoryFull OnInventoryFull;
 	FStackChanged OnStackChanged;
 
+	UInvInventoryWidgetBase* GetInventoryWidget() const { return InventoryWidget; }
+
 protected:
 	virtual void BeginPlay() override;
 

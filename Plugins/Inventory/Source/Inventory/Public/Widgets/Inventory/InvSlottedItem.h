@@ -22,6 +22,8 @@ class INVENTORY_API UInvSlottedItem : public UUserWidget
 
 public:
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& MyGeometry, const FPointerEvent& MouseEvent) override;
+	void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
 	
 	bool IsStackable() const { return bStackable; }
 	void SetStackable(const bool bIsStackable) { bStackable = bIsStackable; }

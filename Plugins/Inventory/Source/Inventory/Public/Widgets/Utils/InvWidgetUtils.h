@@ -27,4 +27,7 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "Inventory|Utils", meta = (WorldContext = "WorldContextObject"))
 	static FVector2D GetWidgetSize(const UWidget* Widget);
+
+	UFUNCTION(BlueprintPure, Category = "Inventory|Utils", meta = (WorldContext = "WorldContextObject"))
+	static FVector2D GetClampedWidgetPosition(const FVector2D& Boundary, const FVector2D& WidgetSize, const FVector2D& MousePosition);
 };

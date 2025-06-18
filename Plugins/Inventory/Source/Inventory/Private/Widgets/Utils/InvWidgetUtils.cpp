@@ -39,3 +39,28 @@ FVector2D UInvWidgetUtils::GetWidgetSize(const UWidget* Widget)
 	const FGeometry& Geometry = Widget->GetCachedGeometry();
 	return Geometry.GetLocalSize();
 }
+
+FVector2D UInvWidgetUtils::GetClampedWidgetPosition(const FVector2D& Boundary, const FVector2D& WidgetSize,
+	const FVector2D& MousePosition)
+{
+	FVector2D ClampedMousePosition = MousePosition;
+
+	if (MousePosition.X + WidgetSize.X > Boundary.X)
+	{
+		ClampedMousePosition.X = Boundary.X - WidgetSize.X;
+	}
+	if (MousePosition.X < 0.f)
+	{
+		ClampedMousePosition.X = 0.f;
+	}
+	if (MousePosition.Y + WidgetSize.Y > Boundary.Y)
+	{
+		ClampedMousePosition.Y = Boundary.Y - WidgetSize.Y;
+	}
+	if (MousePosition.Y < 0.f)
+	{
+		ClampedMousePosition.Y = 0.f;
+	}
+	
+	return ClampedMousePosition;
+}
