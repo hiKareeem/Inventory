@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 
 #include "Widgets/Spatial/InvInventoryGrid.h"
@@ -213,17 +213,6 @@ FIntPoint UInvInventoryGrid::CalculateStartingCoordinates(const FIntPoint& Coord
 	}
 
 	return StartingCoordinates; 
-
-		/*case EInvTileQuadrant::TopLeft:
-			return Coordinates;
-		case EInvTileQuadrant::TopRight:
-			return Coordinates + FIntPoint(HasEvenWidth ? 0 : 1, 0);
-		case EInvTileQuadrant::BottomLeft:
-			return Coordinates + FIntPoint(0, HasEvenHeight ? 0 : 1);
-		case EInvTileQuadrant::BottomRight:
-			return Coordinates + FIntPoint(HasEvenWidth ? 0 : 1, HasEvenHeight ? 0 : 1);
-		default:
-			return FIntPoint();*/
 }
 
 FIntPoint UInvInventoryGrid::CalculateHoveredCoordinates(const FVector2D& CanvasPosition,
@@ -812,4 +801,55 @@ void UInvInventoryGrid::ConstructGrid()
 			GridSlot->OnSlotUnhovered.AddDynamic(this, &UInvInventoryGrid::OnGridSlotUnhovered);
 		}
 	}
+}
+
+FReply UInvInventoryGrid::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	// Only handle drag-and-drop placement if we're in dragging mode
+	if (bIsDragging && IsValid(HoveredItem) && CurrentSpaceQueryResult.bHasSpace)
+	{
+		// Place the item at the current hover position
+		PlaceAtIndex(ItemDropIndex);
+		bIsDragging = false;
+		return FReply::Handled();
+	}
+	
+	// Reset dragging state
+	bIsDragging = false;
+	
+	// For click-to-place, we need to let the event propagate to child widgets (GridSlots)
+	// Don't call Super::NativeOnMouseButtonUp as it might interfere
+	return FReply::Unhandled();
+}
+
+FReply UInvInventoryGrid::NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	// Only check for drag if mouse button is down and we have a hovered item
+	if (InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton) && IsValid(HoveredItem) && !bIsDragging)
+	{
+		// If we don't have a drag start position recorded, record it now
+		if (DragStartPosition.IsZero())
+		{
+			DragStartPosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetOwningPlayer());
+		}
+		else
+		{
+			FVector2D CurrentMousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetOwningPlayer());
+			float DragDistance = FVector2D::Distance(DragStartPosition, CurrentMousePos);
+			
+			// If we've moved enough distance to count as a drag
+			if (DragDistance > 5.0f)
+			{
+				bIsDragging = true;
+			}
+		}
+	}
+	else if (!InMouseEvent.IsMouseButtonDown(EKeys::LeftMouseButton))
+	{
+		// Reset drag start position when mouse button is not down
+		DragStartPosition = FVector2D::ZeroVector;
+	}
+	
+	// Let the event propagate normally
+	return FReply::Unhandled();
 }

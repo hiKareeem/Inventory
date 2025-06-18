@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -28,7 +28,9 @@ class INVENTORY_API UInvInventoryGrid : public UUserWidget
 public:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
-	
+	virtual FReply NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+    virtual FReply NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+
 	EInvItemCategory GetItemCategory() const { return ItemCategory; }
 	FInvSlotAvailabilityResult HasRoomForItem(const UInvItemComponent* ItemComponent);
 
@@ -170,4 +172,8 @@ private:
 	bool bLastMouseWithinCanvas = false;
 	int32 LastHighlightedIndex = INDEX_NONE;
 	FIntPoint LastHighlightedDimensions;
+
+	// Track whether we're in drag mode
+	bool bIsDragging = false;
+	FVector2D DragStartPosition;
 };
