@@ -31,14 +31,16 @@ void UInvSpatialInventoryWidget::NativeTick(const FGeometry& MyGeometry, float I
 
 void UInvSpatialInventoryWidget::OnItemHovered(UInvInventoryItem* Item)
 {
+	const FInvItemManifest ItemManifest = Item->GetItemManifest();
 	UInvItemDescription* ItemDescription = GetItemDescription();
 	ItemDescriptionWidget->SetVisibility(ESlateVisibility::Collapsed);
 
 	GetOwningPlayer()->GetWorldTimerManager().ClearTimer(ItemDescriptionTimer);
 
 	FTimerDelegate ItemDescriptionDelegate;
-	ItemDescriptionDelegate.BindLambda([this]()
+	ItemDescriptionDelegate.BindLambda([this, &ItemManifest, ItemDescription]()
 	{
+		ItemManifest.AssimilateInventoryFragments(ItemDescription);
 		ItemDescriptionWidget->SetVisibility(ESlateVisibility::HitTestInvisible);
 	});
 

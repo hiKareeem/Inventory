@@ -6,6 +6,7 @@
 #include "StructUtils/InstancedStruct.h"
 #include "InvItemManifest.generated.h"
 
+class UInvCompositeBase;
 struct FInvItemFragment;
 
 USTRUCT(BlueprintType)
@@ -17,6 +18,7 @@ public:
 	UInvInventoryItem* Manifest(UObject* Outer) const;
 	EInvItemCategory GetCategory() const { return Category; }
 	const FGameplayTag& GetItemTag() const { return ItemTag; }
+	void AssimilateInventoryFragments(UInvCompositeBase* Composite) const;
 
 	template<typename T> requires std::derived_from<T, FInvItemFragment>
 	const T* GetFragmentByTag(const FGameplayTag& FragmentTag) const;
@@ -26,6 +28,9 @@ public:
 	
 	template<typename T> requires std::derived_from<T, FInvItemFragment>
 	T* GetFragmentMutable();
+
+	template<typename T> requires std::derived_from<T, FInvItemFragment>
+	TArray<const T*> GetAllFragmentsOfType() const;
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory", meta = (ExcludeBaseStruct))
@@ -76,4 +81,18 @@ T* FInvItemManifest::GetFragmentMutable()
 		}
 	}	
 	return nullptr;
+}
+
+template <typename T> requires std::derived_from<T, FInvItemFragment>
+TArray<const T*> FInvItemManifest::GetAllFragmentsOfType() const
+{
+	TArray<const T*> Result;
+	for (const TInstancedStruct<FInvItemFragment>& Fragment : Fragments)
+	{
+		if (const T* FragmentPtr = Fragment.GetPtr<T>())
+		{
+			Result.Add(FragmentPtr);
+		}
+	}
+	return Result;
 }

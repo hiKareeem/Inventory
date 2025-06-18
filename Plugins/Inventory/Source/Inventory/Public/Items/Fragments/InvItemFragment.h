@@ -4,6 +4,8 @@
 #include "GameplayTagContainer.h"
 #include "InvItemFragment.generated.h"
 
+class UInvCompositeBase;
+
 USTRUCT(BlueprintType)
 struct INVENTORY_API FInvItemFragment
 {
@@ -23,6 +25,21 @@ struct INVENTORY_API FInvItemFragment
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory", meta = (Categories = "Fragments"))
 	FGameplayTag FragmentTag = FGameplayTag::EmptyTag;
+};
+
+/*
+ * Item fragment specifically for assimilation into a widget
+ */
+USTRUCT(BlueprintType)
+struct INVENTORY_API FInvInventoryItemFragment : public FInvItemFragment
+{
+	GENERATED_BODY()
+
+public:
+	virtual void Assimilate(UInvCompositeBase* Composite) const;
+	
+protected:
+	bool MatchesWidgetTag(const UInvCompositeBase* Composite) const;
 };
 
 USTRUCT(BlueprintType)
@@ -45,11 +62,12 @@ private:
 };
 
 USTRUCT(BlueprintType)
-struct FInvImageFragment : public FInvItemFragment
+struct FInvImageFragment : public FInvInventoryItemFragment
 {
 	GENERATED_BODY()
 
 	UTexture2D* GetImage() const { return Image; }
+	virtual void Assimilate(UInvCompositeBase* Composite) const override;
 	
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory")
