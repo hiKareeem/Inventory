@@ -526,14 +526,32 @@ void UInvInventoryGrid::SwapWithHoveredItem(UInvInventoryItem* ClickedItem, cons
 {
 	if (!IsValid(HoveredItem)) return;
 
-	UInvInventoryItem* TempItem = HoveredItem->GetItem();
-	const int32 TempStackCount = HoveredItem->GetStackCount();
-	const bool bTempStackable = HoveredItem->IsStackable();
-
-	AssignHoveredItem(ClickedItem, GridIndex, HoveredItem->GetPreviousIndex());
+	// Store both items' details
+	UInvInventoryItem* HoveredItemData = HoveredItem->GetItem();
+	const int32 HoveredStackCount = HoveredItem->GetStackCount();
+	const bool bHoveredStackable = HoveredItem->IsStackable();
+	const int32 HoveredPreviousIndex = HoveredItem->GetPreviousIndex();
+	
+	UInvInventoryItem* ClickedItemData = ClickedItem;
+	const int32 ClickedStackCount = GridSlots[GridIndex]->GetStackCount();
+	const bool bClickedStackable = ClickedItem->IsStackable();
+	
+	// Remove both items from grid
 	RemoveItemFromGrid(ClickedItem, GridIndex);
-	AddItemAtIndex(TempItem, ItemDropIndex, bTempStackable, TempStackCount);
-	UpdateGridSlots(TempItem, ItemDropIndex, bTempStackable, TempStackCount);
+	
+	// Place hovered item at the clicked item's position (target slot)
+	AddItemAtIndex(HoveredItemData, GridIndex, bHoveredStackable, HoveredStackCount);
+	UpdateGridSlots(HoveredItemData, GridIndex, bHoveredStackable, HoveredStackCount);
+	
+	// Place clicked item at hovered item's previous position (origin slot)
+	if (GridSlots.IsValidIndex(HoveredPreviousIndex))
+	{
+		AddItemAtIndex(ClickedItemData, HoveredPreviousIndex, bClickedStackable, ClickedStackCount);
+		UpdateGridSlots(ClickedItemData, HoveredPreviousIndex, bClickedStackable, ClickedStackCount);
+	}
+	
+	// Clear hovered item completely
+	ClearHoveredItem();
 }
 
 bool UInvInventoryGrid::ShouldSwapStackCounts(const int32 RoomInClickedSlot, const int32 HoveredStackCount,
@@ -815,9 +833,9 @@ FReply UInvInventoryGrid::NativeOnMouseButtonUp(const FGeometry& InGeometry, con
 		}
 		else if (CurrentSpaceQueryResult.ValidItem.IsValid() && GridSlots.IsValidIndex(CurrentSpaceQueryResult.UpperLeftIndex))
 		{
-			// Swap with the item at the current hover position (occupied space)
+			// Handle stacking/swapping with the item at the current hover position (occupied space)
 			UInvInventoryItem* ClickedItem = CurrentSpaceQueryResult.ValidItem.Get();
-			SwapWithHoveredItem(ClickedItem, CurrentSpaceQueryResult.UpperLeftIndex);
+			HandleItemPlacementOnOccupiedSlot(ClickedItem, CurrentSpaceQueryResult.UpperLeftIndex);
 		}
 		
 		bIsDragging = false;
@@ -829,6 +847,38 @@ FReply UInvInventoryGrid::NativeOnMouseButtonUp(const FGeometry& InGeometry, con
 	
 	// For click-to-place, we need to let the event propagate to child widgets (GridSlots)
 	return FReply::Unhandled();
+}
+
+void UInvInventoryGrid::HandleItemPlacementOnOccupiedSlot(UInvInventoryItem* ClickedItem, const int32 GridIndex)
+{
+	const int32 ClickedStackCount = GridSlots[GridIndex]->GetStackCount();
+	const FInvStackableFragment* StackableFragment = ClickedItem->GetItemManifest().GetFragment<FInvStackableFragment>();
+	const int32 MaxStackSize = StackableFragment->GetMaxStack();
+	const int32 RoomInClickedSlot = MaxStackSize - ClickedStackCount;
+
+	const int32 HoveredStackCount = HoveredItem->GetStackCount();
+	if (ShouldSwapStackCounts(RoomInClickedSlot, HoveredStackCount, MaxStackSize))
+	{
+		SwapStackCounts(ClickedStackCount, HoveredStackCount, GridIndex);
+		return;
+	}
+
+	if (ShouldConsumeHoveredItemStacks(HoveredStackCount, RoomInClickedSlot))
+	{
+		ConsumeHoveredItemStacks(ClickedStackCount, HoveredStackCount, GridIndex);
+		return;
+	}
+
+	if (RoomInClickedSlot < HoveredStackCount)
+	{
+		FillInStack(RoomInClickedSlot, HoveredStackCount - RoomInClickedSlot, GridIndex);
+		return;
+	}
+	if (RoomInClickedSlot == 0)
+	{
+		return;
+	}
+	SwapWithHoveredItem(ClickedItem, GridIndex);
 }
 
 FReply UInvInventoryGrid::NativeOnMouseMove(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
