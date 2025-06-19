@@ -77,6 +77,20 @@ private:
 };
 
 USTRUCT(BlueprintType)
+struct FInvTextFragment : public FInvInventoryItemFragment
+{
+	GENERATED_BODY()
+
+	FText GetFragmentText() const { return FragmentText; }
+	void SetFragmentText(const FText& InFragmentText) { FragmentText = InFragmentText; }
+	virtual void Assimilate(UInvCompositeBase* Composite) const override;
+	
+private:
+	UPROPERTY(EditAnywhere, Category = "Inventory")
+	FText FragmentText;
+};
+
+USTRUCT(BlueprintType)
 struct FInvStackableFragment : public FInvItemFragment
 {
 	GENERATED_BODY()

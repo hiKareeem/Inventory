@@ -2,6 +2,7 @@
 
 #include "Widgets/Composite/InvCompositeBase.h"
 #include "Widgets/Composite/InvImageLeaf.h"
+#include "Widgets/Composite/InvTextLeaf.h"
 
 void FInvInventoryItemFragment::Assimilate(UInvCompositeBase* Composite) const
 {
@@ -25,4 +26,15 @@ void FInvImageFragment::Assimilate(UInvCompositeBase* Composite) const
 	ImageLeaf->SetImage(Image);
 	ImageLeaf->SetBoxSize(ImageSize);
 	ImageLeaf->SetImageSize(ImageSize);
+}
+
+void FInvTextFragment::Assimilate(UInvCompositeBase* Composite) const
+{
+	FInvInventoryItemFragment::Assimilate(Composite);
+	if (!MatchesWidgetTag(Composite)) return;
+
+	UInvTextLeaf* LeafText = Cast<UInvTextLeaf>(Composite);
+	if (!IsValid(LeafText)) return;
+
+	LeafText->SetText(FragmentText);
 }
