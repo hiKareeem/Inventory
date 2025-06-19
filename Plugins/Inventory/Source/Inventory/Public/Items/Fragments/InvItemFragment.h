@@ -23,19 +23,18 @@ struct INVENTORY_API FInvItemFragment
 	void SetFragmentTag(const FGameplayTag InFragmentTag) { FragmentTag = InFragmentTag; }
 	
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "Inventory", meta = (Categories = "Fragments"))
+	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (Categories = "Fragments"))
 	FGameplayTag FragmentTag = FGameplayTag::EmptyTag;
 };
 
-/*
- * Item fragment specifically for assimilation into a widget
+/**
+ *  Item fragment specifically for assimilation into a widget
  */
 USTRUCT(BlueprintType)
 struct INVENTORY_API FInvInventoryItemFragment : public FInvItemFragment
 {
 	GENERATED_BODY()
 
-public:
 	virtual void Assimilate(UInvCompositeBase* Composite) const;
 	
 protected:

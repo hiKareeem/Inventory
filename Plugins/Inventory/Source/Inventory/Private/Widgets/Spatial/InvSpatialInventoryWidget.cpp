@@ -31,7 +31,7 @@ void UInvSpatialInventoryWidget::NativeTick(const FGeometry& MyGeometry, float I
 
 void UInvSpatialInventoryWidget::OnItemHovered(UInvInventoryItem* Item)
 {
-	const FInvItemManifest ItemManifest = Item->GetItemManifest();
+	const FInvItemManifest& ItemManifest = Item->GetItemManifest();
 	UInvItemDescription* ItemDescription = GetItemDescription();
 	ItemDescriptionWidget->SetVisibility(ESlateVisibility::Collapsed);
 
