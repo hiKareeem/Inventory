@@ -7,4 +7,6 @@ namespace FragmentTags
 	UE_DEFINE_GAMEPLAY_TAG(StackableFragment, "Fragments.Stackable");
 	
 	UE_DEFINE_GAMEPLAY_TAG(ItemNameFragment, "Fragments.ItemName");
+	UE_DEFINE_GAMEPLAY_TAG(DescriptionFragment, "Fragments.Description");
+	UE_DEFINE_GAMEPLAY_TAG(FlavorTextFragment, "Fragments.FlavorText");
 }

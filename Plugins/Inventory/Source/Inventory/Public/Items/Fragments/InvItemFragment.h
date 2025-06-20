@@ -86,7 +86,7 @@ struct FInvTextFragment : public FInvInventoryItemFragment
 	virtual void Assimilate(UInvCompositeBase* Composite) const override;
 	
 private:
-	UPROPERTY(EditAnywhere, Category = "Inventory")
+	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (MultiLine="true"))
 	FText FragmentText;
 };
 
